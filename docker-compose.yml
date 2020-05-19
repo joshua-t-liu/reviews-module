@@ -1,0 +1,27 @@
+version: '3.4'
+
+services:
+  mysqldb:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_USER_FILE: /seed/mysql.user
+      MYSQL_PASSWORD_FILE: /seed/mysql.pass 
+      MYSQL_ROOT_PASSWORD_FILE: /seed/mysql.pass
+      MYSQL_DATABASE: adidas_fec
+    volumes:
+      - type: bind
+        source: ./seed
+        target: /seed
+    ports:
+      - '3306:3306'
+  reviews:
+    build: .
+    environment:
+      NODE_ENV: production
+    depends_on:
+        - 'mysqldb'
+    ports:
+      - '3003:3003'
+
+
