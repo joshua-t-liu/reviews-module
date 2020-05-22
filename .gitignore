@@ -1,3 +1,6 @@
+SDC/product
+SDC/review
+SDC/user
 ## MAC files ##
 # Local development
 *.env

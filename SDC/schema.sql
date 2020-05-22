@@ -86,7 +86,10 @@ CREATE TABLE IF NOT EXISTS reviews.reviews (
 -- rule of thumb, helpful if table is larger than memory that the db server is running on
 -- partitioning by product_id will hurt queries looking to pull all reviews from a specific user
 CREATE INDEX product_id_index ON reviews.reviews(product_id);
-
+CREATE INDEX user_id_index ON reviews.reviews(user_id);
+CREATE INDEX newest_index ON reviews.reviews(product_id, created_at DESC NULLS LAST);
+-- apparently making an order by column an index, will remove the overhead for accessing the heap ???
+-- multi-column makes more sense because having separate indices would require the planner to review timestamps across all products when creating the bitmap ????
 
 CREATE TABLE IF NOT EXISTS reviews.photos (
   photo_id serial primary key,
@@ -96,23 +99,17 @@ CREATE TABLE IF NOT EXISTS reviews.photos (
 
 CREATE INDEX review_id_index ON reviews.photos (review_id) INCLUDE (link); -- index-only-scan
 
-
 -- run after creating the database to improve heap access by bundling indexed rows together
-CLUSTER reviews.reviews USING product_id;
+CLUSTER VERBOSE reviews.reviews USING product_id_index;
 
-CREATE INDEX user_id_index ON reviews(user_id);
-CREATE INDEX newest_index ON reviews(product_id, created_at DESC NULL LAST);
--- apparently making an order by column an index, will remove the overhead for accessing the heap ???
--- multi-column makes more sense because having separate indices would require the planner to review timestamps across all products when creating the bitmap ????
-
-CREATE VIEW reviews.reviews_by_product (
+CREATE VIEW reviews.reviews_by_product AS
   SELECT r.*, u.nickname, u.verified
-    FROM reviews as r, users as u
+    FROM reviews.reviews as r, reviews.users as u
     WHERE r.user_id = u.user_id
-    ORDER BY r.created_at
+    ORDER BY r.created_at DESC NULLS LAST
     --- LIMIT 5 OFFSET XXX
     -- should i aggregate photos as a a single column array_agg(SELECT photos FROM photos where review_id = <some review id>)
-);
+;
 
 -- PREPARE statements are not persistent and only exist on the db client/server session where it was created
 
@@ -120,10 +117,10 @@ PREPARE reviewplan (int, int, int) AS
   SELECT *,
     (SELECT array_agg(link) AS photos
       FROM reviews.photos
-      WHERE reviews.photos.product_id = $1)
-    FROM reviews.reviews_by_product
-    WHERE reviews.reviews_by_product.product_id = $1
+      WHERE reviews.photos.review_id = r.review_id)
+    FROM reviews.reviews_by_product as r
+    WHERE r.product_id = $1
     LIMIT $2 OFFSET $3;
 
--- EXECUTE reviewplan(<product_id>);
+-- EXECUTE reviewplan(product_id, limit, offset);
 

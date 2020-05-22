@@ -2,11 +2,14 @@ const fs = require('fs');
 const faker = require('faker');
 
 //for mysql
-//create 10M products
+// 100k products
+// ~200 reviews/ products
+// 10M users
+// 30M records total
 let j = 10;
 while(j){
   let i = 10;
-  let file = fs.createWriteStream(`./db/product/seed_product${j}.csv`);
+  let file = fs.createWriteStream(`./SDC/product/seed_product${j}.csv`);
   while(i) {
     file.write(faker.commerce.productName() + '\n');
     i--;
@@ -19,7 +22,7 @@ while(j){
 j = 10;
 while(j){
   let i = 10;
-  let file = fs.createWriteStream(`./db/user/seed_user${j}.csv`);
+  let file = fs.createWriteStream(`./SDC/user/seed_user${j}.csv`);
   while(i) {
     file.write(
       faker.internet.userName() + ',' +
@@ -39,7 +42,7 @@ const ratings_centered = ['too_small', 'small', 'perfect', 'big', 'too_big'];
 j = 10;
 while(j) {
   let i = 10;
-  let file = fs.createWriteStream(`./db/review/seed_user${j}.csv`);
+  let file = fs.createWriteStream(`./SDC/review/seed_user${j}.csv`);
 
   while(i) {
     // 10% 0, 80% 1-500, 5%, 501-1k ,5% 1k-5k
