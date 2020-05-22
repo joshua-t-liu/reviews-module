@@ -1,3 +1,13 @@
+-- use cases
+-- 100k products
+-- ~200 reviews/ products -- 0(min), 5000(max), 100(avg)
+-- 10M users
+-- 30M records total
+-- read is prioritized
+-- write can have a 48hr delay
+-- update/delete can be slow as well
+-- load reviews in increments of 5
+
 CREATE KEYSPACE IF NOT EXIST reviews
   WITH replication = {'class': 'NetworkTopologyStrategy', 'replcation_factor': 1};
 

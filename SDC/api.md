@@ -29,7 +29,7 @@
         "is_not_helpful": "Number",
         "nickname": "String",
         "verified": "Boolean",
-        "photos": "Array["String"]"
+        "photos": "Array[String]",
         "created_At": "datetime",
       }
       ...
@@ -55,9 +55,11 @@
       "rating_quality": "Number",
       "is_helpful": "Number",
       "is_not_helpful": "Number",
+      "user_id": "Number",
       "nickname": "String",
+      "email": "String",
       "verified": "Boolean",
-      "photos": "Array["String"]"
+      "photos": "Array[String]",
       "created_At": "datetime",
     }
 ```
@@ -84,9 +86,7 @@
       "rating_quality": "Number",
       "is_helpful": "Number",
       "is_not_helpful": "Number",
-      "nickname": "String",
-      "verified": "Boolean",
-      "photos": "Array["String"]"
+      "photos": "Array[String]",
       "created_At": "datetime",
     }
 ```
@@ -113,14 +113,11 @@
 **Returns:** JSON
 
 ```Array
-    [
-      {
-        "id": "Number",
-        "nickname": "String",
-        "email": "String"
-      }
-      ...
-    ]
+    {
+      "id": "Number",
+      "nickname": "String",
+      "email": "String"
+    }
 ```
 
 ### Create user
