@@ -13,17 +13,18 @@ CREATE SCHEMA IF NOT EXISTS reviews;
 CREATE TABLE IF NOT EXISTS reviews.products (
   product_id serial primary key,
   product_name varchar(255) not null,
-  review_count smallint DEFAULT 0,
-  rating_overall numeric(3,2) DEFAULT 0.0,
-  rating_size numeric(3,2) DEFAULT 0.0,
-  rating_width numeric(3,2) DEFAULT 0.0,
-  rating_comfort numeric(3,2) DEFAULT 0.0,
-  rating_quality numeric(3,2) DEFAULT 0.0,
-  count_5 smallint DEFAULT 0,
-  count_4 smallint DEFAULT 0,
-  count_3 smallint DEFAULT 0,
-  count_2 smallint DEFAULT 0,
-  count_1 smallint DEFAULT 0
+  -- should I dynamically count/ratings or statically
+  -- review_count smallint DEFAULT 0,
+  -- rating_overall numeric(3,2) DEFAULT 0.0,
+  -- rating_size numeric(3,2) DEFAULT 0.0,
+  -- rating_width numeric(3,2) DEFAULT 0.0,
+  -- rating_comfort numeric(3,2) DEFAULT 0.0,
+  -- rating_quality numeric(3,2) DEFAULT 0.0,
+  -- count_5 smallint DEFAULT 0,
+  -- count_4 smallint DEFAULT 0,
+  -- count_3 smallint DEFAULT 0,
+  -- count_2 smallint DEFAULT 0,
+  -- count_1 smallint DEFAULT 0
 );
 
 CREATE INDEX product_name_index ON reviews.products(product_name); --let's search product by product name
@@ -82,14 +83,16 @@ CREATE TABLE IF NOT EXISTS reviews.reviews (
   created_at timestamp DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (product_id, user_id)
 ); -- PARTITION BY HASH (product_id);
--- maybe no need to partition, since it probably will not help since data is still relatively small so index tree is still small???
+-- maybe no need to partition, since it probably will not help since data is still relatively small so index tree is still small and can fit in memory ???
 -- rule of thumb, helpful if table is larger than memory that the db server is running on
 -- partitioning by product_id will hurt queries looking to pull all reviews from a specific user
-CREATE INDEX product_id_index ON reviews.reviews(product_id);
 CREATE INDEX user_id_index ON reviews.reviews(user_id);
 CREATE INDEX newest_index ON reviews.reviews(product_id, created_at DESC NULLS LAST);
 -- apparently making an order by column an index, will remove the overhead for accessing the heap ???
 -- multi-column makes more sense because having separate indices would require the planner to review timestamps across all products when creating the bitmap ????
+
+-- run after creating the database to improve heap access by bundling indexed rows together
+CLUSTER VERBOSE reviews.reviews USING newest_index;
 
 CREATE TABLE IF NOT EXISTS reviews.photos (
   photo_id serial primary key,
@@ -98,9 +101,6 @@ CREATE TABLE IF NOT EXISTS reviews.photos (
 );
 
 CREATE INDEX review_id_index ON reviews.photos (review_id) INCLUDE (link); -- index-only-scan
-
--- run after creating the database to improve heap access by bundling indexed rows together
-CLUSTER VERBOSE reviews.reviews USING product_id_index;
 
 CREATE VIEW reviews.reviews_by_product AS
   SELECT r.*, u.nickname, u.verified
@@ -121,6 +121,7 @@ PREPARE reviewplan (int, int, int) AS
     FROM reviews.reviews_by_product as r
     WHERE r.product_id = $1
     LIMIT $2 OFFSET $3;
-
 -- EXECUTE reviewplan(product_id, limit, offset);
+
+COPY reviews.users FROM './SDC/user/seed_user1.csv' WITH (FORMAT csv);
 

@@ -9,10 +9,13 @@
 -- load reviews in increments of 5
 
 CREATE KEYSPACE IF NOT EXIST reviews
-  WITH replication = {'class': 'NetworkTopologyStrategy', 'replcation_factor': 1};
+  WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+-- NetworkTopologyStrategy
+-- 5 nodes(instances)
+-- bottleneck
 
 CREATE TABLE IF NOT EXIST reviews.users (
-  user_id int,
+  user_id int, -- uuid or counter
   nickname text,
   email text,
   verified boolean,
@@ -20,24 +23,24 @@ CREATE TABLE IF NOT EXIST reviews.users (
 
 CREATE TABLE IF NOT EXIST reviews.product_names_to_id (
   product_name text,
-  product_id int
+  product_id int,
   PRIMARY KEY((product_name))
 );
 
 CREATE TABLE IF NOT EXIST reviews.products (
   product_id int,
   product_name text,
-  review_count smallint,
-  rating_overall float,
-  rating_size float,
-  rating_width float,
-  rating_comfort float,
-  rating_quality float,
-  count_5 smallint,
-  count_4 smallint,
-  count_3 smallint,
-  count_2 smallint,
-  count_1 smallint,
+  -- review_count smallint,
+  -- rating_overall float,
+  -- rating_size float,
+  -- rating_width float,
+  -- rating_comfort float,
+  -- rating_quality float,
+  -- count_5 smallint,
+  -- count_4 smallint,
+  -- count_3 smallint,
+  -- count_2 smallint,
+  -- count_1 smallint,
   PRIMARY KEY((product_id))
 );
 
@@ -48,7 +51,7 @@ CREATE TABLE IF NOT EXIST reviews.reviews_by_product (
   product_id int,
   user_id int,
   created_at timestamp DEFAULT CURRENT_TIMESTAMP,
-  photos set<text>,
+  photos set<text>, -- maybe create a photos, is best practice
   title text,
   text text,
   recommends boolean,
