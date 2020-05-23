@@ -12,7 +12,7 @@ CREATE SCHEMA IF NOT EXISTS reviews;
 
 CREATE TABLE IF NOT EXISTS reviews.products (
   product_id serial primary key,
-  product_name varchar(255) not null,
+  product_name varchar(255) not null
   -- should I dynamically count/ratings or statically
   -- review_count smallint DEFAULT 0,
   -- rating_overall numeric(3,2) DEFAULT 0.0,
@@ -123,5 +123,10 @@ PREPARE reviewplan (int, int, int) AS
     LIMIT $2 OFFSET $3;
 -- EXECUTE reviewplan(product_id, limit, offset);
 
-COPY reviews.users FROM './SDC/user/seed_user1.csv' WITH (FORMAT csv);
+
+COPY reviews.users (nickname, email, verified) FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/user/seed_user1.csv' WITH (FORMAT csv);
+
+COPY reviews.products (product_name) FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/product/seed_product1.csv' WITH (FORMAT csv);
+
+COPY reviews.reviews (product_name) FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/product/seed_product1.csv' WITH (FORMAT csv);
 
