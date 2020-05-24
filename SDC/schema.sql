@@ -67,11 +67,11 @@ INSERT INTO reviews.ratings_centered (ratings_centered, score) VALUES
 
 CREATE TABLE IF NOT EXISTS reviews.reviews (
   review_id serial primary key,
-  product_id integer not null references reviews.products(product_id) ON DELETE CASCADE,
-  user_id integer references reviews.users(user_id) ON DELETE SET NULL,
+  product_id integer not null, -- references reviews.products(product_id) ON DELETE CASCADE,
+  user_id integer, -- references reviews.users(user_id) ON DELETE SET NULL,
   -- for deleted users, should i keep reviews and just make them anonymous??? would that affect my unique constraint???
   title varchar(150),
-  text varchar(255) not null, --strings are stored in increments of bytes
+  text text not null, --strings are stored in increments of bytes
   recommends boolean not null,
   rating_overall rating not null,
   rating_size ratings_centered not null,
@@ -80,19 +80,19 @@ CREATE TABLE IF NOT EXISTS reviews.reviews (
   rating_quality rating not null,
   is_helpful smallint DEFAULT 0,
   is_not_helpful smallint DEFAULT 0,
-  created_at timestamp DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE (product_id, user_id)
+  created_at timestamp DEFAULT CURRENT_TIMESTAMP
+  --UNIQUE (product_id, user_id)
 ); -- PARTITION BY HASH (product_id);
 -- maybe no need to partition, since it probably will not help since data is still relatively small so index tree is still small and can fit in memory ???
 -- rule of thumb, helpful if table is larger than memory that the db server is running on
 -- partitioning by product_id will hurt queries looking to pull all reviews from a specific user
-CREATE INDEX user_id_index ON reviews.reviews(user_id);
-CREATE INDEX newest_index ON reviews.reviews(product_id, created_at DESC NULLS LAST);
+-- CREATE INDEX user_id_index ON reviews.reviews(user_id);
+-- CREATE INDEX newest_index ON reviews.reviews(product_id, created_at DESC NULLS LAST);
 -- apparently making an order by column an index, will remove the overhead for accessing the heap ???
 -- multi-column makes more sense because having separate indices would require the planner to review timestamps across all products when creating the bitmap ????
 
 -- run after creating the database to improve heap access by bundling indexed rows together
-CLUSTER VERBOSE reviews.reviews USING newest_index;
+-- CLUSTER VERBOSE reviews.reviews USING newest_index;
 
 CREATE TABLE IF NOT EXISTS reviews.photos (
   photo_id serial primary key,
@@ -123,10 +123,33 @@ PREPARE reviewplan (int, int, int) AS
     LIMIT $2 OFFSET $3;
 -- EXECUTE reviewplan(product_id, limit, offset);
 
+--(nickname, email, verified)
+COPY reviews.users FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module/SDC/user/seed_user1.csv' WITH (FORMAT csv);
 
-COPY reviews.users (nickname, email, verified) FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/user/seed_user1.csv' WITH (FORMAT csv);
+COPY reviews.products (product_name) FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module/SDC/product/seed_product1.csv' WITH (FORMAT csv);
 
-COPY reviews.products (product_name) FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/product/seed_product1.csv' WITH (FORMAT csv);
-
-COPY reviews.reviews (product_name) FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/product/seed_product1.csv' WITH (FORMAT csv);
-
+-- (
+--   product_id,
+--   user_id,
+--   title,
+--   text,
+--   recommends,
+--   rating_overall,
+--   rating_size,
+--   rating_width,
+--   rating_comfort,
+--   rating_quality,
+--   is_helpful,
+--   is_not_helpful,
+--   created_at
+--   )
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review10.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review9.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review8.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review7.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review6.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review5.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review4.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review3.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review2.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review1.csv' WITH (FORMAT csv);

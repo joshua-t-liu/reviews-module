@@ -8,18 +8,22 @@
 -- update/delete can be slow as well
 -- load reviews in increments of 5
 
-CREATE KEYSPACE IF NOT EXIST reviews
+CREATE KEYSPACE IF NOT EXISTS reviews
   WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 -- NetworkTopologyStrategy
 -- 5 nodes(instances)
 -- bottleneck
 
-CREATE TABLE IF NOT EXIST reviews.users (
-  user_id int, -- uuid or counter
+USE reviews;
+
+CREATE TABLE IF NOT EXISTS reviews.users (
+  -- user_id uuid, -- uuid or counter
   nickname text,
   email text,
   verified boolean,
-  PRIMARY KEY ((user_id)));
+  PRIMARY KEY ((nickname)));
+
+COPY users (nickname, email, verified) FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/user/seed_user10.csv';
 
 CREATE TABLE IF NOT EXIST reviews.product_names_to_id (
   product_name text,
