@@ -13,7 +13,6 @@ CREATE SCHEMA IF NOT EXISTS reviews;
 CREATE TABLE IF NOT EXISTS reviews.products (
   product_id serial primary key,
   product_name varchar(255) not null
-  -- should I dynamically count/ratings or statically
   -- review_count smallint DEFAULT 0,
   -- rating_overall numeric(3,2) DEFAULT 0.0,
   -- rating_size numeric(3,2) DEFAULT 0.0,
@@ -34,6 +33,7 @@ CREATE TABLE IF NOT EXISTS reviews.users (
   nickname varchar(25) not null,
   email varchar(255) not null,
   verified boolean DEFAULT false,
+  last_product int, -- references reviews.products(product_id)
   PRIMARY KEY (user_id) INCLUDE (nickname, email, verified) -- would index-only-scan be helpful to remove heap access or is 3 columns too much data
 );
 
@@ -91,25 +91,24 @@ CREATE TABLE IF NOT EXISTS reviews.reviews (
 -- apparently making an order by column an index, will remove the overhead for accessing the heap ???
 -- multi-column makes more sense because having separate indices would require the planner to review timestamps across all products when creating the bitmap ????
 
--- run after creating the database to improve heap access by bundling indexed rows together
--- CLUSTER VERBOSE reviews.reviews USING newest_index;
+-- DO $$
+-- BEGIN
+--   FOR i IN 0..127
+--   LOOP
+--     EXECUTE format('CREATE TABLE reviews.reviews_p%s PARTITION OF reviews.reviews FOR VALUES WITH (MODULUS 128, REMAINDER %s)', i, i);
+--   END LOOP;
+-- END $$;
+
+-- CREATE INDEX newest_index ON reviews.reviews(product_id, created_at DESC NULLS LAST);
 
 CREATE TABLE IF NOT EXISTS reviews.photos (
   photo_id serial primary key,
   review_id integer not null references reviews.reviews(review_id),
+  product_id int not null references reviews.products(product_id),
   link varchar(255) not null
 );
 
 CREATE INDEX review_id_index ON reviews.photos (review_id) INCLUDE (link); -- index-only-scan
-
-CREATE VIEW reviews.reviews_by_product AS
-  SELECT r.*, u.nickname, u.verified
-    FROM reviews.reviews as r, reviews.users as u
-    WHERE r.user_id = u.user_id
-    ORDER BY r.created_at DESC NULLS LAST
-    --- LIMIT 5 OFFSET XXX
-    -- should i aggregate photos as a a single column array_agg(SELECT photos FROM photos where review_id = <some review id>)
-;
 
 -- PREPARE statements are not persistent and only exist on the db client/server session where it was created
 
@@ -118,15 +117,16 @@ PREPARE reviewplan (int, int, int) AS
     (SELECT array_agg(link) AS photos
       FROM reviews.photos
       WHERE reviews.photos.review_id = r.review_id)
-    FROM reviews.reviews_by_product as r
-    WHERE r.product_id = $1
+    FROM reviews.reviews as r, reviews.users as u
+    WHERE r.user_id = u.user_id and r.product_id = $1
+    ORDER BY r.created_at DESC NULLS LAST
     LIMIT $2 OFFSET $3;
 -- EXECUTE reviewplan(product_id, limit, offset);
 
 --(nickname, email, verified)
 COPY reviews.users FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module/SDC/user/seed_user1.csv' WITH (FORMAT csv);
 
-COPY reviews.products (product_name) FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module/SDC/product/seed_product1.csv' WITH (FORMAT csv);
+COPY reviews.products FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module/SDC/product/seed_product1.csv' WITH (FORMAT csv);
 
 -- (
 --   product_id,
@@ -143,6 +143,7 @@ COPY reviews.products (product_name) FROM '/mnt/c/users/joshua/Desktop/SDC/revie
 --   is_not_helpful,
 --   created_at
 --   )
+
 COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review10.csv' WITH (FORMAT csv);
 COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review9.csv' WITH (FORMAT csv);
 COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review8.csv' WITH (FORMAT csv);
