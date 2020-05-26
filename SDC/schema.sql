@@ -13,17 +13,18 @@ CREATE SCHEMA IF NOT EXISTS reviews;
 CREATE TABLE IF NOT EXISTS reviews.products (
   product_id serial primary key,
   product_name varchar(255) not null
-  -- review_count smallint DEFAULT 0,
-  -- rating_overall numeric(3,2) DEFAULT 0.0,
-  -- rating_size numeric(3,2) DEFAULT 0.0,
-  -- rating_width numeric(3,2) DEFAULT 0.0,
-  -- rating_comfort numeric(3,2) DEFAULT 0.0,
-  -- rating_quality numeric(3,2) DEFAULT 0.0,
-  -- count_5 smallint DEFAULT 0,
-  -- count_4 smallint DEFAULT 0,
-  -- count_3 smallint DEFAULT 0,
-  -- count_2 smallint DEFAULT 0,
-  -- count_1 smallint DEFAULT 0
+  recommends numeric(3,0) DEFAULT 0;
+  review_count smallint DEFAULT 0,
+  rating_overall numeric(3,2) DEFAULT 0.0,
+  rating_size numeric(3,2) DEFAULT 0.0,
+  rating_width numeric(3,2) DEFAULT 0.0,
+  rating_comfort numeric(3,2) DEFAULT 0.0,
+  rating_quality numeric(3,2) DEFAULT 0.0,
+  count_5 smallint DEFAULT 0,
+  count_4 smallint DEFAULT 0,
+  count_3 smallint DEFAULT 0,
+  count_2 smallint DEFAULT 0,
+  count_1 smallint DEFAULT 0
 );
 
 CREATE INDEX product_name_index ON reviews.products(product_name); --let's search product by product name
@@ -33,7 +34,6 @@ CREATE TABLE IF NOT EXISTS reviews.users (
   nickname varchar(25) not null,
   email varchar(255) not null,
   verified boolean DEFAULT false,
-  last_product int, -- references reviews.products(product_id)
   PRIMARY KEY (user_id) INCLUDE (nickname, email, verified) -- would index-only-scan be helpful to remove heap access or is 3 columns too much data
 );
 
@@ -109,6 +109,13 @@ CREATE TABLE IF NOT EXISTS reviews.photos (
 );
 
 CREATE INDEX review_id_index ON reviews.photos (review_id) INCLUDE (link); -- index-only-scan
+
+
+-- COPY (SELECT DISTINCT ON (user_id) user_id, max(product_id)
+--   FROM reviews.reviews
+--   GROUP BY user_id) TO '/mnt/c/users/joshua/Desktop/SDC/reviews-module/SDC/user/last_product.csv'
+--   DELIMITER ',';
+
 
 -- PREPARE statements are not persistent and only exist on the db client/server session where it was created
 
