@@ -1,6 +1,6 @@
 module.exports = {
-  host: 'mysqldb',
+  host: 'localhost',
   user: 'root',
-  password: 'examplepw',
+  password: 'example!',
   database: 'adidas_fec'
 };

@@ -1,6 +1,7 @@
 SDC/product
 SDC/review
 SDC/user
+notes.sql
 ## MAC files ##
 # Local development
 *.env

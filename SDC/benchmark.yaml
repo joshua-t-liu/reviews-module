@@ -1,0 +1,9 @@
+keyspace: reviews
+table: reviews_by_product
+columnspec:
+  - name: product_id
+    population: uniform(1..99999)
+queries:
+  events:
+    cql: select * from reviews_by_product where product_id = ?
+    fields: samerow

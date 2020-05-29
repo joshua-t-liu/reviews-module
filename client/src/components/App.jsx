@@ -104,14 +104,15 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    // this.fetchReviews();
+    this.fetchReviews();
   }
 
   // HTTP Request Handlers
   fetchReviews() {
     // // fetch(url)
-    // // .then(response => response.json()) 
-    let url = `/api/models/${this.state.productcode}/reviews`;
+    // // .then(response => response.json())
+    //let url = `/api/models/${this.state.productcode}/reviews`;
+    let url = `/api/product/${Math.floor(Math.random() * 99999)}/review`;
     axios(url)
       .then(response => response.data)
       .then(reviewsData => this.changeReviews(reviewsData))

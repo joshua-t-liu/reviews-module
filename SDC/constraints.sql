@@ -2,12 +2,10 @@ ALTER TABLE reviews.reviews ADD CONSTRAINT prodfk FOREIGN KEY (product_id) REFER
 
 ALTER TABLE reviews.reviews ADD CONSTRAINT userfk FOREIGN KEY (user_id) REFERENCES reviews.users(user_id);
 
-CREATE INDEX user_id_index ON reviews.reviews(user_id);
+CREATE INDEX newest_index ON reviews.reviews(product_id, created_at DESC NULLS LAST) INCLUDE(review_id, user_id, title, text, recommends, rating_overall, is_helpful, is_not_helpful);
 
--- CREATE INDEX newest_index ON reviews.reviews(product_id, created_at DESC NULLS LAST);
-CREATE INDEX newest_index ON reviews.reviews(product_id, created_at DESC NULLS LAST) INCLUDE(user_id, title, text, recommends, rating_overall, is_helpful, is_not_helpful);
+CREATE INDEX email_index ON reviews.users(email);
 
--- CLUSTER VERBOSE reviews.reviews USING newest_index;
 VACUUM ANALYZE reviews.users;
 VACUUM ANALYZE reviews.photos;
 VACUUM ANALYZE reviews.reviews;
@@ -69,3 +67,30 @@ CREATE TRIGGER update_product AFTER INSERT OR UPDATE OR DELETE
   ON reviews.reviews
   FOR EACH ROW
     EXECUTE FUNCTION reviews.update_product_summary();
+
+CREATE OR REPLACE FUNCTION reviews.createReview(user_row reviews.users, review jsonb) RETURNS void AS $$
+DECLARE
+  id integer;
+BEGIN
+  SELECT user_id INTO id FROM reviews.users AS u WHERE u.email = user_row.email;
+
+  IF NOT FOUND THEN
+    WITH new_user AS (INSERT INTO reviews.users (nickname, email, verified) VALUES (user_row.nickname, user_row.email, user_row.verified) RETURNING *)
+    SELECT user_id INTO id FROM new_user;
+  END IF;
+
+  INSERT INTO reviews.reviews
+  (product_id, user_id, title, text, recommends, rating_overall, rating_size, rating_width, rating_comfort, rating_quality)
+  VALUES (CAST(review->>'product_id' AS integer), id, review->>'title', review->>'text', CAST(review->>'recommends' AS boolean), CAST(review->>'rating_overall' AS rating), CAST(review->>'rating_size' AS ratings_centered), CAST(review->>'rating_width' AS ratings_centered), CAST(review->>'rating_comfort' as rating), CAST(review->>'rating_quality' AS rating));
+
+  -- (jsonb_to_record(jsonb_set(review, '{user_id}', format('%s',id)::jsonb))) AS x(product_id int, user_id int, title text, text text, recommends boolean, rating_overall rating, rating_size rating_centered, rating_width rating_centered, rating_comfort rating, rating_quality rating)
+END;
+$$ LANGUAGE plpgsql;
+
+-- CREATE MATERIALIZED VIEW reviews.users_by_product AS
+--   SELECT review_id, product_id, nickname, verified
+--     FROM reviews.reviews JOIN reviews.users USING (user_id);
+
+-- CREATE INDEX users_by_product_index ON reviews.users_by_product(product_id, review_id) INCLUDE (nickname, verified);
+
+-- CLUSTER VERBOSE reviews.users_by_product USING users_by_product_index;

@@ -1,31 +1,39 @@
-// server flow: index.js -> routes -> controller -> model -> db-mysql
 const express = require('express');
 const bodyParser = require('body-parser');
-const morgan = require('morgan');
 const path = require('path');
-const cors = require('cors');
-
-const middleware = require('./middleware.js');
-const router = require('./routes.js');
+const { getReviews, createReview } = require('../db');
 
 const app = express();
-const PORT = process.env.REVIEWSPORT || 3003;
-app.set('port', PORT);
-
-// app.use(bodyParser.json());
-// app.use(morgan('dev'));
-app.use(express.json());
-app.use(middleware.httpRequestLogger);
-app.use(cors());
-
-app.get('/api', (req, res) => {
-  console.log('hello inside get route');
-  res.send('response sent correctly!');
-});
-
-app.use('/api/models', router);
+const PORT = 3003;
 
 app.use(express.static(path.join(__dirname, '../client', 'dist')));
+app.use(bodyParser.json());
 
-app.listen(app.get('port'), () =>
-  console.log('Listening on port: ' + app.get('port')));
+app.get(`/api/product/:product_id/review`, (req, res) => {
+  const { product_id } = req.params;
+  getReviews(product_id, 0, (err, result) => {
+    if (err) {
+      console.log(err);
+      res.sendStatus(404)
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+app.post(`/api/product/:product_id/review`, (req, res) => {
+  const { product_id } = req.params;
+  const review = req.body;
+  review['product_id'] = parseInt(product_id);
+
+  createReview(review, (err, result) => {
+    if (err) {
+      console.log(err);
+      res.sendStatus(404)
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+app.listen(PORT, () => console.log('Listening on port', PORT));

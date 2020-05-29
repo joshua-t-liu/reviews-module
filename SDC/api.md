@@ -48,6 +48,7 @@
 **Request Body:**
 ```JSON
     {
+      "product_id": "Number",
       "title": "String",
       "text": "String",
       "recommends": "Boolean",
@@ -62,8 +63,7 @@
       "nickname": "String",
       "email": "String",
       "verified": "Boolean",
-      "photos": "[image URL...]",
-      "created_At": "YYYY-MM-MM",
+      "photos": "[image URL...]"
     }
 ```
 
