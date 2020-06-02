@@ -1,0 +1,10 @@
+keyspace: reviews
+table: reviews_by_product
+columnspec:
+  - name: product_id
+    population: uniform(1..99999)
+queries:
+  events:
+    #cql: SELECT * FROM reviews_by_product WHERE product_id = ? limit
+    cql: INSERT INTO reviews.reviews_by_product (product_id, user_id, nickname, verified, created_at, title, text, recommends, rating_overall, rating_size, rating_width, rating_comfort, rating_quality, is_helpful, is_not_helpful) VALUES (?, 9999999, 'Nona.Price24', false, '2020-05-30T04:42:37.007Z', 'This is my favorite product!!!', 'I really love this product.  It is everything I expected plus more.  So happy I brought this product', true, 'great', 'perfect', 'perfect', 'great', 'great', 0, 0)
+    fields: samerow

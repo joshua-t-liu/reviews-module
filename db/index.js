@@ -6,31 +6,17 @@ const pool = new Pool({
   password: 'example',
   host: 'localhost',
   port: 5432,
-  database: 'postgres'
+  database: 'postgres',
+  max: 10,
 });
 
-const getReviews = (productId, offset, cb) => {
+const connect = (name, text, values, cb) => {
   pool.connect((err, client, done) => {
     if (err) throw err;
     client.query({
-      name: 'reviewplan',
-      text:
-        `WITH reviews AS (
-          SELECT review_id AS id, user_id, title, text, recommends, reviews.mapRating(rating_overall) AS rating_overall, is_helpful, is_not_helpful, created_at
-          FROM reviews.reviews
-          WHERE product_id = $1
-          ORDER BY created_at DESC NULLS LAST LIMIT 5 OFFSET $2
-        )
-        SELECT r.*, u.nickname, u.verified,
-          (
-            SELECT array_agg(link) AS links
-              FROM reviews.photos
-              WHERE review_id = r.id
-              GROUP BY review_id
-          )
-          FROM reviews AS r JOIN
-          reviews.users AS u USING (user_id)`,
-    }, [productId, offset], (err, res) => {
+      name,
+      text,
+    }, values, (err, res) => {
       done();
 
       if (err) {
@@ -40,29 +26,45 @@ const getReviews = (productId, offset, cb) => {
       }
     });
   });
+};
+
+const getReviews = (productId, offset, cb) => {
+  const name = 'reviewplan';
+  const text = `WITH reviews AS (
+                  SELECT review_id AS id, user_id, title, text, recommends, reviews.mapRating(rating_overall) AS rating_overall, is_helpful, is_not_helpful, created_at
+                  FROM reviews.reviews
+                  WHERE product_id = $1
+                  ORDER BY created_at DESC NULLS LAST LIMIT 5 OFFSET $2
+                )
+                SELECT r.*, u.nickname, u.verified,
+                (
+                  SELECT array_agg(link) AS links
+                    FROM reviews.photos
+                    WHERE review_id = r.id
+                    GROUP BY review_id
+                )
+                FROM reviews AS r JOIN
+                reviews.users AS u USING (user_id)`;
+  const values = [productId, offset];
+  connect(name, text, values, cb);
 };
 
 const createReview = (review, cb) => {
-  pool.connect((err, client, done) => {
-    if (err) throw err.stack;
-    const { nickname, email, ... review_info } = review;
+  const name = 'createplan';
+  const text = 'SELECT reviews.createReview($1::jsonb)';
+  const values = [review];
+  connect(name, text, values, cb);
+};
 
-    client.query({
-      name: 'createplan',
-      text: 'SELECT reviews.createReview($1::reviews.users, $2::jsonb)',
-    }, [`(0, ${nickname}, ${email}, false)`, review], (err, res) => {
-      done();
-
-      if (err) {
-        cb(err.stack);
-      } else {
-        cb(null, res.rows);
-      }
-    });
-  });
+const getProduct = (productId, cb) => {
+  const name = 'productPlan';
+  const text = 'SELECT * FROM reviews.products WHERE product_id = $1';
+  const values = [productId];
+  connect(name, text, values, cb);
 };
 
 module.exports = {
+  getProduct,
   getReviews,
   createReview,
 };

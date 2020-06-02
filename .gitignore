@@ -2,6 +2,12 @@ SDC/product
 SDC/review
 SDC/user
 notes.sql
+newrelic.js
+nginx.conf
+cqlshrc
+cache.conf
+zzz_archive
+
 ## MAC files ##
 # Local development
 *.env

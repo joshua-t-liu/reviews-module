@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS reviews.reviews_by_product (
   rating_quality text,
   is_helpful smallint,
   is_not_helpful smallint,
-  PRIMARY KEY ((product_id), created_at)
+  PRIMARY KEY ((product_id), created_at, user_id)
 ) WITH CLUSTERING ORDER BY (created_at DESC);
 
 
