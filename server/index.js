@@ -25,7 +25,7 @@ app.get(`/api/product/:product_id`, (req, res) => {
       console.log(err);
       res.sendStatus(404)
     } else {
-      res.set('Cache-Control', 'public, max-age=604800');
+      //res.set('Cache-Control', 'public, max-age=604800');
       res.send(result);
     }
   });
@@ -38,7 +38,7 @@ app.get(`/api/product/:product_id/review`, (req, res) => {
       console.log(err);
       res.sendStatus(404)
     } else {
-      res.set('Cache-Control', 'public, max-age=604800');
+      //res.set('Cache-Control', 'public, max-age=604800');
       res.send(result);
     }
   });
