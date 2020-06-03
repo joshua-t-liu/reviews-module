@@ -2,8 +2,8 @@ const { Pool } = require('pg');
 
 // pool by default has 10 clients
 const pool = new Pool({
-  user: 'example',
-  password: 'example',
+  user: 'postgres',
+  password: 'postgres',
   host: 'localhost',
   port: 5432,
   database: 'postgres',

@@ -6,7 +6,7 @@ const path = require('path');
 const { getProduct, getReviews, createReview } = require('../db');
 
 const app = express();
-const PORT = 3004;
+const PORT = 3003;
 
 app.use(bodyParser.json());
 app.use(compression());

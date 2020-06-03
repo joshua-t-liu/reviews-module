@@ -6,59 +6,70 @@ const faker = require('faker');
 // ~200 reviews/ products
 // 10M users
 // 30M records total
-let j = 1;
-let counter = 0;
-while(j){
-  let i = 100000;
-  let file = fs.createWriteStream(`./SDC/product/seed_product${j}.csv`);
-  while(i) {
-    file.write(
-      counter++ + ',' +
-      faker.commerce.productName() +
-      '\n');
-    i--;
-  }
-  file.end();
-  j--;
-}
 
-console.log('finished seeding products');
+
+const generateProducts = async () => {
+  let ready;
+  let j = 1;
+  let counter = 1;
+
+  while(j){
+    let i = 100000;
+    let file = fs.createWriteStream(`./seed/product/seed_product${j}.csv`);
+    while(i) {
+      ready = file.write(
+        counter++ + ',' +
+        faker.commerce.productName() +
+        '\n');
+      if (!ready) {
+        await (new Promise((resolve) => file.once('drain', resolve)));
+      }
+      i--;
+    }
+    file.end();
+    j--;
+  }
+  console.log('finished seeding products');
+};
 
 //create users
-j = 1;
-counter = 0;
-while(j){
-  let i = 10000000;
-  let file = fs.createWriteStream(`./SDC/user/seed_user${j}.csv`);
-  while(i) {
-    file.write(
-      counter++ + ',' +
-      faker.internet.userName().substring(0,25) + ',' +
-      faker.internet.email() + ',' +
-      (i % 2 === 0) +
-      '\n');
-    i--;
+const generateUsers = async () => {
+  let ready;
+  let j = 1;
+  let counter = 1;
+  while(j){
+    let i = 10000000;
+    let file = fs.createWriteStream(`./seed/user/seed_user${j}.csv`);
+    while(i) {
+      ready = file.write(
+        counter++ + ',' +
+        faker.internet.userName().substring(0,25) + ',' +
+        faker.internet.email() + ',' +
+        (i % 2 === 0) +
+        '\n');
+      if (!ready) {
+        await (new Promise((resolve) => file.once('drain', resolve)));
+      }
+      i--;
+    }
+    file.end();
+    j--;
   }
-  file.end();
-  j--;
+  console.log('finished seeding users');
 }
-
-console.log('finished seeding users');
 
 //create reviews
 const generateReviews = async () => {
-  let j = 10;
-  let counter = 0;
   let ready;
-  let drain;
-
-  let product_id = 0;
+  let j = 10;
+  let counter = 1;
+  let product_id = 1;
   const ratings = ['poor', 'fair', 'average', 'good', 'great'];
   const ratings_centered = ['too_small', 'small', 'perfect', 'big', 'too_big'];
 
   while(j) {
     let i = 10000;
-    let file = fs.createWriteStream(`./SDC/review/seed_review${j}.csv`);
+    let file = fs.createWriteStream(`./seed/review/seed_review${j}.csv`);
 
     while(i) {
       // 10% 0, 80% 1-500, 5%, 501-1k ,5% 1k-5k
@@ -88,9 +99,9 @@ const generateReviews = async () => {
           faker.random.number({min:0, max:50}) + ',' + // is_not_helpful
           faker.date.recent(90).toISOString() + // date should be datetime, does it matter???
           '\n');
-          if (!ready) {
-            await (new Promise((resolve) => file.once('drain', resolve)));
-          }
+        if (!ready) {
+          await (new Promise((resolve) => file.once('drain', resolve)));
+        }
         k--;
       }
       i--;
@@ -101,6 +112,6 @@ const generateReviews = async () => {
   }
 }
 
+//generateProducts();
+//generateUsers();
 generateReviews();
-
-
