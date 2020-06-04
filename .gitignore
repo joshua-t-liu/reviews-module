@@ -1,3 +1,7 @@
+processed.txt
+nohup.out
+iftop-0.17
+iftop-0.17.tar.gz 
 SDC/product
 SDC/review
 SDC/user
@@ -7,6 +11,7 @@ nginx.conf
 cqlshrc
 cache.conf
 zzz_archive
+aws-scripts-mon
 
 ## MAC files ##
 # Local development
