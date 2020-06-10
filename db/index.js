@@ -4,14 +4,10 @@ const { Pool } = require('pg');
 const pool = new Pool({
   user: 'postgres',
   password: 'postgres',
-<<<<<<< HEAD
-  host: '18.188.95.246',
-=======
-  host: '18.216.50.227',
->>>>>>> 086216538d2425968e9de0dbfac6546b82c51dc4
+  host: '3.22.224.120',
   port: 5432,
   database: 'postgres',
-  max: 30,
+  max: 25,
 });
 
 const connect = (name, text, values, cb) => {
@@ -31,6 +27,21 @@ const connect = (name, text, values, cb) => {
     });
   });
 };
+
+// const connect = (name, text, values, cb) => {
+//   pool.connect()
+//   .then(client => {
+//     return client.query({ name, text }, values)
+//       .then(res => {
+//         client.release();
+//         cb(null, res.rows);
+//       })
+//       .catch(err => {
+//         client.release();
+//         cb(err).stack;
+//       });
+//   })
+// };
 
 const getReviews = (productId, offset, cb) => {
   const name = 'reviewplan';

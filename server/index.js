@@ -18,8 +18,11 @@ const options = {
 
 app.use(express.static(path.join(__dirname, '../client', 'dist'), options));
 
+let counter = 0;
+
 app.get(`/api/product/:product_id`, (req, res) => {
   const { product_id } = req.params;
+  counter++;
   getProduct(product_id, (err, result) => {
     if (err) {
       console.log(err);
@@ -29,6 +32,8 @@ app.get(`/api/product/:product_id`, (req, res) => {
     }
   });
 });
+
+app.get('/counter', (req, res) => res.send(String(counter)));
 
 app.get(`/api/product/:product_id/review`, (req, res) => {
   const { product_id } = req.params;
