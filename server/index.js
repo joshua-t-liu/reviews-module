@@ -1,9 +1,17 @@
-require('newrelic');
+//require('newrelic');
 const express = require('express');
 const compression = require('compression');
 const bodyParser = require('body-parser');
 const path = require('path');
 const { getProduct, getReviews, createReview } = require('../db');
+const redis = require('redis');
+const { promisify } = require('util');
+const http2 = require('http2');
+const fs = require('fs');
+const spdy = require('spdy');
+
+const client = redis.createClient('/tmp/redis.sock');
+const get = promisify(client.get).bind(client);
 
 const app = express();
 const PORT = 3003;
@@ -11,40 +19,57 @@ const PORT = 3003;
 app.use(bodyParser.json());
 app.use(compression());
 
-const options = {
-  maxAge: '1d',
-  setHeaders: (res, path) => { res.set('Cache-Control', 'public, max-age=604800') },
-};
-
-app.use(express.static(path.join(__dirname, '../client', 'dist'), options));
-
-let counter = 0;
+app.use(express.static('./client/dist'));
 
 app.get(`/api/product/:product_id`, (req, res) => {
   const { product_id } = req.params;
-  counter++;
-  getProduct(product_id, (err, result) => {
-    if (err) {
-      console.log(err);
-      res.sendStatus(404)
+  get(`primary-${product_id}`)
+  .then(cache => {
+    if (cache === null) {
+      getProduct(product_id, (err, result) => {
+        if (err) {
+          console.log(err);
+          res.sendStatus(404)
+        } else {
+          //client.set(`primary-${product_id}`, JSON.stringify(result));
+          res.set('Cache-Control', 'public, max-age=604800');
+          res.set('Content-Type', 'application/json');
+          res.send(result);
+        }
+      });
     } else {
-      res.send(result);
+      res.set('Cache-Control', 'public, max-age=604800');
+      res.set('Content-Type', 'application/json');
+      res.send(cache);
     }
-  });
+ })
+ .catch(err => res.sendStatus(404));
 });
-
-app.get('/counter', (req, res) => res.send(String(counter)));
 
 app.get(`/api/product/:product_id/review`, (req, res) => {
   const { product_id } = req.params;
-  getReviews(product_id, 0, (err, result) => {
-    if (err) {
-      console.log(err);
-      res.sendStatus(404)
+
+  get(product_id)
+  .then(cache => {
+    if (cache === null) {
+      getReviews(product_id, 0, (err, result) => {
+        if (err) {
+          console.log(err);
+          res.sendStatus(404)
+        } else {
+          //client.set(product_id, JSON.stringify(result));
+          res.set('Cache-Control', 'public, max-age=604800');
+          res.set('Content-Type', 'application/json');
+          res.send(result);
+        }
+      });
     } else {
-      res.send(result);
+      res.set('Cache-Control', 'public, max-age=604800');
+      res.set('Content-Type', 'application/json'); 
+      res.send(cache);
     }
-  });
+  })
+  .catch(err => res.sendStatus(404));
 });
 
 app.post(`/api/product/:product_id/review`, (req, res) => {
@@ -61,4 +86,14 @@ app.post(`/api/product/:product_id/review`, (req, res) => {
   });
 });
 
+app.get('/test', (req, res) =>  res.send());
+
 app.listen(PORT, () => console.log('Listening on port', PORT));
+
+//http2.createSecureServer({
+
+/*spdy.createServer({
+  key: fs.readFileSync('private-key.pem'),
+  cert: fs.readFileSync('server-cert.pem'),
+}, app).listen(PORT);
+*/

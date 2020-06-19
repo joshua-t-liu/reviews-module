@@ -25,7 +25,10 @@
     "express": "^4.17.1",
     "faker": "^4.1.0",
     "newrelic": "^6.8.0",
-    "pg": "^8.2.1"
+    "perf_hooks": "0.0.1",
+    "pg": "^8.2.1",
+    "redis": "^3.0.2",
+    "spdy": "^4.0.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
