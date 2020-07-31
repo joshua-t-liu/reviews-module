@@ -6,11 +6,8 @@ const path = require('path');
 const { getProduct, getReviews, createReview } = require('../db');
 const redis = require('redis');
 const { promisify } = require('util');
-const http2 = require('http2');
-const fs = require('fs');
-const spdy = require('spdy');
 
-const client = redis.createClient('/tmp/redis.sock');
+const client = redis.createClient();//'/tmp/redis.sock'
 const get = promisify(client.get).bind(client);
 
 const app = express();
@@ -23,6 +20,7 @@ app.use(express.static('./client/dist'));
 
 app.get(`/api/product/:product_id`, (req, res) => {
   const { product_id } = req.params;
+
   get(`primary-${product_id}`)
   .then(cache => {
     if (cache === null) {
@@ -65,7 +63,7 @@ app.get(`/api/product/:product_id/review`, (req, res) => {
       });
     } else {
       res.set('Cache-Control', 'public, max-age=604800');
-      res.set('Content-Type', 'application/json'); 
+      res.set('Content-Type', 'application/json');
       res.send(cache);
     }
   })
@@ -76,6 +74,7 @@ app.post(`/api/product/:product_id/review`, (req, res) => {
   const { product_id } = req.params;
   const review = req.body;
   review['product_id'] = parseInt(product_id);
+
   createReview(review, (err, result) => {
     if (err) {
       console.log(err);
@@ -89,11 +88,3 @@ app.post(`/api/product/:product_id/review`, (req, res) => {
 app.get('/test', (req, res) =>  res.send());
 
 app.listen(PORT, () => console.log('Listening on port', PORT));
-
-//http2.createSecureServer({
-
-/*spdy.createServer({
-  key: fs.readFileSync('private-key.pem'),
-  cert: fs.readFileSync('server-cert.pem'),
-}, app).listen(PORT);
-*/

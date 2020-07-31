@@ -1,0 +1,12 @@
+COPY reviews.users FROM '/mnt/c/users/joshua/Desktop/reviews-module/seed/data/seed_user1.csv' WITH (FORMAT csv);
+COPY reviews.products FROM '/mnt/c/users/joshua/Desktop/reviews-module/seed/data/seed_product1.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/reviews-module/seed/data/seed_review10.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/reviews-module/seed/data/seed_review9.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/reviews-module/seed/data/seed_review8.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/reviews-module/seed/data/seed_review7.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/reviews-module/seed/data/seed_review6.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/reviews-module/seed/data/seed_review5.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/reviews-module/seed/data/seed_review4.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/reviews-module/seed/data/seed_review3.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/reviews-module/seed/data/seed_review2.csv' WITH (FORMAT csv);
+COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/reviews-module/seed/data/seed_review1.csv' WITH (FORMAT csv);

@@ -12,8 +12,8 @@ CREATE SCHEMA IF NOT EXISTS reviews;
 
 CREATE TABLE IF NOT EXISTS reviews.products (
   product_id serial primary key,
-  product_name varchar(255) not null
-  recommends numeric(3,0) DEFAULT 0;
+  product_name varchar(255) not null,
+  recommends numeric(3,0) DEFAULT 0,
   review_count smallint DEFAULT 0,
   rating_overall numeric(3,2) DEFAULT 0.0,
   rating_size numeric(3,2) DEFAULT 0.0,
@@ -37,10 +37,10 @@ CREATE TABLE IF NOT EXISTS reviews.users (
   PRIMARY KEY (user_id) INCLUDE (nickname, verified)
 );
 
-CREATE TYPE rating AS ENUM ('poor', 'fair', 'average', 'good', 'great');
+CREATE TYPE ratings AS ENUM ('poor', 'fair', 'average', 'good', 'great');
 
 CREATE TABLE IF NOT EXISTS reviews.ratings (
-  rating rating not null,
+  rating ratings not null,
   score smallint not null
 );
 
@@ -72,11 +72,11 @@ CREATE TABLE IF NOT EXISTS reviews.reviews (
   title varchar(150),
   text text not null,
   recommends boolean not null,
-  rating_overall rating not null,
+  rating_overall ratings not null,
   rating_size ratings_centered not null,
   rating_width ratings_centered not null,
-  rating_comfort rating not null,
-  rating_quality rating not null,
+  rating_comfort ratings not null,
+  rating_quality ratings not null,
   is_helpful smallint DEFAULT 0,
   is_not_helpful smallint DEFAULT 0,
   created_at timestamp DEFAULT CURRENT_TIMESTAMP
@@ -92,25 +92,12 @@ CREATE TABLE IF NOT EXISTS reviews.photos (
 
 CREATE INDEX review_id_index ON reviews.photos (review_id) INCLUDE (link);
 
-PREPARE reviewplan (int, int, int) AS
-  SELECT *,
-    (SELECT array_agg(link) AS photos
-      FROM reviews.photos
-      WHERE reviews.photos.review_id = r.review_id)
-    FROM reviews.reviews as r, reviews.users as u
-    WHERE r.user_id = u.user_id and r.product_id = $1
-    ORDER BY r.created_at DESC NULLS LAST
-    LIMIT $2 OFFSET $3;
-
-COPY reviews.users FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module/SDC/user/seed_user1.csv' WITH (FORMAT csv);
-COPY reviews.products FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module/SDC/product/seed_product1.csv' WITH (FORMAT csv);
-COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review10.csv' WITH (FORMAT csv);
-COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review9.csv' WITH (FORMAT csv);
-COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review8.csv' WITH (FORMAT csv);
-COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review7.csv' WITH (FORMAT csv);
-COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review6.csv' WITH (FORMAT csv);
-COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review5.csv' WITH (FORMAT csv);
-COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review4.csv' WITH (FORMAT csv);
-COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review3.csv' WITH (FORMAT csv);
-COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review2.csv' WITH (FORMAT csv);
-COPY reviews.reviews FROM '/mnt/c/users/joshua/Desktop/SDC/reviews-module//SDC/review/seed_review1.csv' WITH (FORMAT csv);
+-- PREPARE reviewplan (int, int, int) AS
+--   SELECT *,
+--     (SELECT array_agg(link) AS photos
+--       FROM reviews.photos
+--       WHERE reviews.photos.review_id = r.review_id)
+--     FROM reviews.reviews as r, reviews.users as u
+--     WHERE r.user_id = u.user_id and r.product_id = $1
+--     ORDER BY r.created_at DESC NULLS LAST
+--     LIMIT $2 OFFSET $3;

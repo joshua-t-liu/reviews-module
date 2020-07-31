@@ -1,79 +1,39 @@
-# Reviews Module 
+## Designing and Scaling the Backend of a Customer Reviews Microservice
 
-Reviews module for e-commerce website of Front End Capstone Project #HRSF127
+### Goal
+Designed and scaled the backend of a customer reviews microservice to maintain a load of **1200** RPS under **50** ms latency.  Deployed servers onto AWS which included 1 Nginx server, 2 Express servers, and 1 PostgreSQL server.  The PostgreSQL server included 50 M primary records.  Used Loader.io, New Relic, and CloudWatch to perform and analyze load testing .
 
-## Related Projects
+*The frontend was developed by a teammate and was developed using React.*
 
-  - https://github.com/9-space-lobster/addidas-product
-  - https://github.com/9-space-lobster/adidas-related-info
-  - https://github.com/9-space-lobster/adidas-instagram-feed
-  - https://github.com/9-space-lobster/adidas-crawler
 
-## Table of Contents
+### Technology
+ * Express
+ * Nginx
+ * AWS (t2.micro services)
+ * PostgreSQL
+ * Loader.io
+ * New Relic
+ * RedisDB
+ * React
 
-1. [Usage](#Usage)
-1. [Requirements](#requirements)
-1. [Development](#development)
+### Images
+![Customer Reviews](https://github.com/joshua-t-liu/reviews-module/blob/master/images/customer_reviews.png)
 
-## Usage
+### Database Schema
+![Image Gallery](https://github.com/joshua-t-liu/reviews-module/blob/master/images/schema.png)
 
-### Seeding the MySQL Database
-
-```sh
-cp db-mysql/config.example.js db-mysql/config.js
-```
-Make sure that the new config.js file is ignored by Git, then update `user` and `password` with your MySQL credentials. It is currently defaulted to `root` and ` `.
-
-```sh
-brew services list
-brew services start mysql@5.7
-```
-Start your MySQL database. Your version may differ.
-
-```sh
-npm run seed
-```
-Your database is now seeded.
-
-### Starting the Server
-
-```sh
-npm run react-dev
-npm run server-dev
-```
-
-This will run the project with a seeded MySQL database on [localhost:3003](http://localhost:3003) 
-
-## Requirements
-
-An `nvmrc` file is included if using [nvm](https://github.com/creationix/nvm).
-
-- Node 12.16.0
-- npm 6.14.
-- MySQL 5.7.0
-
-```sh
-node --version
-npm --version
-mysql --version && which mysql
-```
-
-## Development
-
-### Installing Dependencies
-
-From within the root directory:
-
-```sh
-npm install
-```
-
-- React 16
-- Express 4
-- Babel 7
-- Webpack 4
-
-### Install MySQL 5.7 on macOS
-This procedure explains how to install [MySQL](https://www.mysql.com) using [Homebrew](http://brew.sh) on macOS (Sierra 10.12 and up)
-
-https://gist.github.com/operatino/392614486ce4421063b9dece4dfe6c21
+### Reproduction Steps
+Assumes PostgreSQL is installed in the local environment.
+1. Run ```$ npm install```.
+2. Start the PostgreSQL database.
+3. Start the POstgreSQL server ```$ sudo service postgresql start```.
+4. Enter PostgreSQL CLI ```$ sudo -u postgres psql```.
+5. Create the database ```# \i /mnt/c/users/joshua/Desktop/reviews-module/seed/schema.sql```.
+   - The filepath will be wherever the file is saved in your local environment.
+6. Create a new folder called data in the seed folder ```mkdir ./seed/data```.
+7. Create seed data ```$ node ./seed/seed.js```.
+7. Import seed data into PostgreSQL ```# \i /mnt/c/users/joshua/Desktop/reviews-module/seed/import_data.sql```.
+8. Validate that data successfully imported ```# SELECT * FROM reviews.reviews LIMIT 5```.
+9. Add constraints to the database tables ```# \i /mnt/c/users/joshua/Desktop/reviews-module/seed/constraints.sql```.
+9. Start the Express server ```node ./index.js```.
+10. Click  [link](https://localhost:3003) and check that customer reviews service is working.

@@ -23,12 +23,9 @@
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "express": "^4.17.1",
-    "faker": "^4.1.0",
     "newrelic": "^6.8.0",
-    "perf_hooks": "0.0.1",
     "pg": "^8.2.1",
-    "redis": "^3.0.2",
-    "spdy": "^4.0.2"
+    "redis": "^3.0.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
@@ -46,6 +43,7 @@
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
     "eslint-config-hackreactor": "git://github.com/reactorcore/eslint-config-hackreactor",
+    "faker": "^4.1.0",
     "jest": "^25.5.4",
     "morgan": "^1.10.0",
     "node-fetch": "^2.6.0",

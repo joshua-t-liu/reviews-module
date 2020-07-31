@@ -1,10 +1,15 @@
+seed/data/
+redis-stable.tar.gz
+READMEold.md
+setupold.md
+redis-stable
 redis-6.0.5
 nohup.out
 redis-6.0.5.tar.gz
 processed.txt
 nohup.out
 iftop-0.17
-iftop-0.17.tar.gz 
+iftop-0.17.tar.gz
 SDC/product
 SDC/review
 SDC/user
